@@ -9,7 +9,7 @@ class User(AbstractUser):
         DEFAULT = "Default"
         ADMIN = "Admin"
 
-    email = models.EmailField(unique=True)
+    email = models.EmailField(unique=True, blank=True, null=True)
     address = models.CharField(max_length=30)
     role = models.CharField(
         max_length=30, choices=UserRole.choices, default=UserRole.DEFAULT

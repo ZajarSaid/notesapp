@@ -7,7 +7,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("", include("user.urls"), name="users"),
     path("user/register/", CreateUserView.as_view(), name="register"),
-    path("user/token/", TokenObtainPairView.as_view(), name="rget_token"),
+    path("user/token/", TokenObtainPairView.as_view(), name="get_token"),
     path("user/refresh/", TokenRefreshView.as_view(), name="refresh-token"),
     path("user-auth/", include("rest_framework.urls")),
 ]
