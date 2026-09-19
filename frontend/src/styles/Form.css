@@ -34,3 +34,44 @@
 .form-button:hover {
   background-color: #0056b3;
 }
+
+.error-message {
+  color: #dc2626;
+  background-color: #fee2e2;
+  border: 1px solid #fecaca;
+  padding: 10px;
+  margin-bottom: 15px;
+  border-radius: 5px;
+}
+
+.error-alert {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+
+  padding: 12px 16px;
+  margin-bottom: 15px;
+
+  border: 1px solid #f5c2c7;
+  border-radius: 6px;
+
+  background-color: #f8d7da;
+  color: #842029;
+}
+
+.alert-close {
+  border: none;
+  background: transparent;
+  color: #842029;
+
+  font-size: 22px;
+  font-weight: bold;
+
+  cursor: pointer;
+  padding: 0 5px;
+}
+
+.alert-close:hover {
+  opacity: 0.7;
+}

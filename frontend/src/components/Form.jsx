@@ -9,6 +9,7 @@ export default function Form({ route, method }) {
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMsg] = useState("");
   const navigate = useNavigate();
 
   const name = method === "login" ? "Login" : "Register";
@@ -32,6 +33,10 @@ export default function Form({ route, method }) {
         navigate("/login");
       }
     } catch (error) {
+      setErrorMsg(
+        error.response?.data?.detail ||
+          "Something went wrong. Please try again.",
+      );
       console.log(error.response?.data);
     } finally {
       setLoading(false);
@@ -41,6 +46,19 @@ export default function Form({ route, method }) {
   return (
     <form onSubmit={handleSubmit} className="form-container">
       <h1>{name}</h1>
+      {errorMessage && (
+        <div className="error-alert">
+          <span>{errorMessage}</span>
+
+          <button
+            type="button"
+            className="alert-close"
+            onClick={() => setErrorMsg("")}
+          >
+            ×
+          </button>
+        </div>
+      )}
       <input
         className="form-input"
         type="text"
@@ -64,7 +82,6 @@ export default function Form({ route, method }) {
           placeholder="Email"
         />
       )}
-
       <button className="form-button" type="submit">
         {name}
       </button>
