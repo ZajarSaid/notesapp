@@ -1,5 +1,4 @@
 import "./App.css";
-import NameHandler from "./components/home";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Register from "./pages/register";
 import Login from "./pages/login";
@@ -22,7 +21,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route
-          path="/"
+          path="/home"
           element={
             <ProtectedRoute>
               <Home />

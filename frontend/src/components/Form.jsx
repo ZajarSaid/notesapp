@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import api from "../api";
 import { ACCESS_TOKEN, REFRESH_TOKEN } from "../constants";
 import "../styles/Form.css";
+import { LoadingIndicator } from "./LoadingIndicator";
 
 export default function Form({ route, method }) {
   const [username, setUsername] = useState("");
@@ -28,16 +29,21 @@ export default function Form({ route, method }) {
       if (method === "login") {
         localStorage.setItem(ACCESS_TOKEN, res.data.access);
         localStorage.setItem(REFRESH_TOKEN, res.data.refresh);
-        navigate("/");
+        navigate("/home");
       } else {
         navigate("/login");
       }
     } catch (error) {
+      const data = error.response?.data;
+
       setErrorMsg(
-        error.response?.data?.detail ||
+        data?.username?.[0] ||
+          data?.email?.[0] ||
+          data?.detail ||
           "Something went wrong. Please try again.",
       );
-      console.log(error.response?.data);
+
+      console.log(data);
     } finally {
       setLoading(false);
     }
@@ -82,6 +88,9 @@ export default function Form({ route, method }) {
           placeholder="Email"
         />
       )}
+      <div>
+        <center>{loading && <LoadingIndicator />}</center>
+      </div>
       <button className="form-button" type="submit">
         {name}
       </button>

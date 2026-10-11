@@ -24,13 +24,16 @@ class NoteListCreate(generics.ListCreateAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        return Note.objects.filter(author=user)
+
+        print("CURRENT USER:", user)
+        print("USER ID:", user.id)
+
+        notes = Note.objects.filter(author=user)
+        print("NOTES:", notes)
+        return notes
 
     def perform_create(self, serializer):
-        if serializer.is_valid():
-            serializer.save(author=self.request.user)
-        else:
-            print(serializer.errors)
+        serializer.save(author=self.request.user)
 
 
 class NoteDelete(generics.DestroyAPIView):
