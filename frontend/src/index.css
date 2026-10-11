@@ -1,0 +1,308 @@
+/* ==================================================================
+   GLOBAL DESIGN SYSTEM
+   Single source of truth for colours, radii, shadows and typography.
+   Every page/component stylesheet consumes these CSS custom properties
+   so the whole app stays visually consistent and easy to retheme.
+   ================================================================== */
+
+:root {
+  /* Brand */
+  --primary: #6d5efc;
+  --primary-600: #5b4bdb;
+  --primary-700: #4838b8;
+  --accent: #22d3ee;
+  --secondary: #ec4899;
+
+  /* Signature gradients */
+  --grad-brand: linear-gradient(135deg, #7c5cff 0%, #6366f1 48%, #22d3ee 100%);
+  --grad-soft: linear-gradient(135deg, #eef0ff 0%, #f5f0ff 100%);
+
+  /* Surfaces */
+  --bg: #f3f4fb;
+  --surface: #ffffff;
+  --surface-2: #f8f9ff;
+  --border: #e6e8f2;
+  --border-strong: #d5d8e8;
+
+  /* Text */
+  --text: #1c2033;
+  --text-soft: #43485c;
+  --muted: #747a8c;
+  --muted-2: #9aa0b2;
+
+  /* Feedback */
+  --success: #10b981;
+  --success-soft: #e7f8f1;
+  --danger: #ef4444;
+  --danger-soft: #fdecec;
+  --warning: #f59e0b;
+
+  /* Radii */
+  --radius-sm: 10px;
+  --radius: 16px;
+  --radius-lg: 24px;
+  --radius-pill: 999px;
+
+  /* Elevation */
+  --shadow-xs: 0 1px 2px rgba(24, 28, 54, 0.06);
+  --shadow-sm: 0 4px 12px -4px rgba(24, 28, 54, 0.12);
+  --shadow-md: 0 18px 40px -18px rgba(76, 54, 190, 0.35);
+  --shadow-lg: 0 30px 60px -24px rgba(37, 27, 92, 0.4);
+  --ring: 0 0 0 4px rgba(109, 94, 252, 0.18);
+
+  /* Type */
+  --font-body: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Plus Jakarta Sans", var(--font-body);
+
+  --transition: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.55;
+  background-color: var(--bg);
+  /* Layered radial "aurora" wash kept behind all content. */
+  background-image:
+    radial-gradient(46rem 34rem at 8% -8%, rgba(124, 92, 255, 0.16), transparent 62%),
+    radial-gradient(40rem 32rem at 100% 0%, rgba(34, 211, 238, 0.14), transparent 58%),
+    radial-gradient(48rem 40rem at 50% 118%, rgba(236, 72, 153, 0.1), transparent 60%);
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  color: var(--text);
+  line-height: 1.2;
+  margin: 0 0 0.4em;
+  letter-spacing: -0.02em;
+}
+
+p {
+  margin: 0 0 1em;
+}
+
+a {
+  color: var(--primary);
+  text-decoration: none;
+  transition: color var(--transition);
+}
+
+a:hover {
+  color: var(--primary-700);
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+input,
+textarea,
+button {
+  font-family: inherit;
+  font-size: 1rem;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+::selection {
+  background: rgba(124, 92, 255, 0.22);
+}
+
+/* Visible keyboard focus everywhere, for accessibility. */
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Custom scrollbar (WebKit + Firefox) */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border: 3px solid transparent;
+  background-clip: content-box;
+  border-radius: var(--radius-pill);
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-2);
+  background-clip: content-box;
+}
+
+/* ==================================================================
+   SHARED FORM FIELDS
+   Used by both the auth form and the note composer, so they are
+   defined once here instead of duplicated per page.
+   ================================================================== */
+.field {
+  display: block;
+}
+
+.field__label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-soft);
+  margin-bottom: 0.4rem;
+}
+
+.field__count {
+  font-weight: 500;
+  font-size: 0.75rem;
+  color: var(--muted-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.field__control {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.field__control:focus-within {
+  border-color: var(--primary);
+  box-shadow: var(--ring);
+}
+
+.field__icon {
+  display: grid;
+  place-items: center;
+  padding-left: 0.85rem;
+  color: var(--muted-2);
+}
+
+.field__control:focus-within .field__icon {
+  color: var(--primary);
+}
+
+.field__input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 0.8rem 0.75rem;
+  color: var(--text);
+  outline: none;
+  min-width: 0;
+}
+
+.field__input::placeholder {
+  color: var(--muted-2);
+}
+
+.field__toggle {
+  display: grid;
+  place-items: center;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  padding: 0.5rem 0.75rem;
+  border-radius: 10px;
+  transition: color var(--transition);
+}
+
+.field__toggle:hover {
+  color: var(--primary);
+}
+
+.field__textarea {
+  width: 100%;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  padding: 0.85rem;
+  color: var(--text);
+  line-height: 1.6;
+  outline: none;
+  resize: vertical;
+  min-height: 120px;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.field__textarea::placeholder {
+  color: var(--muted-2);
+}
+
+.field__textarea:focus {
+  border-color: var(--primary);
+  box-shadow: var(--ring);
+}
+
+/* Full-page auth gate splash */
+.app-splash {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+/* Screen-reader-only helper */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

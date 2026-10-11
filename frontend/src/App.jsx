@@ -20,6 +20,9 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* Visiting the site root used to fall through to the
+            catch-all and render the 404 ("NOT FOUND") page. */}
+        <Route path="/" element={<Navigate to="/home" replace />} />
         <Route
           path="/home"
           element={

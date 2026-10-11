@@ -1,68 +1,297 @@
-/* Container for the whole page */
-div {
-  font-family: Arial, sans-serif;
+/* ========================= NOTES / HOME ========================= */
+
+.home {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
-/* Styles for the notes section */
-.notes-section {
+.home__main {
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: clamp(1.5rem, 4vw, 2.75rem) clamp(1rem, 4vw, 1.75rem) 4rem;
+}
+
+/* ---------------- Hero ---------------- */
+.home__hero {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.5rem;
+  flex-wrap: wrap;
   margin-bottom: 2rem;
 }
 
-.notes-section h2 {
-  color: #333;
-  font-size: 24px;
+.home__eyebrow {
+  margin: 0 0 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--primary);
 }
 
-/* Styles for individual notes - assuming your Note component has some container element */
-.note {
-  background-color: #f9f9f9;
-  border-left: 5px solid #007bff;
-  margin: 10px 0;
-  padding: 10px 15px;
-  border-radius: 5px;
+.home__greeting {
+  font-size: clamp(1.6rem, 4vw, 2.4rem);
+  margin: 0 0 0.35rem;
 }
 
-/* Styles for the form section */
-form {
-  background-color: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  max-width: 500px;
-  margin: auto;
+.home__lede {
+  margin: 0;
+  max-width: 52ch;
+  color: var(--muted);
 }
 
-form h2 {
-  color: #333;
-  font-size: 24px;
-  margin-bottom: 20px;
+.home__stats {
+  display: flex;
+  gap: 0.75rem;
 }
 
-form label {
-  font-weight: bold;
-  margin-top: 10px;
+.stat {
+  min-width: 104px;
+  padding: 0.9rem 1.1rem;
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: var(--shadow-xs);
+  text-align: center;
 }
 
-form input,
-form textarea {
+.stat__value {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 1.7rem;
+  font-weight: 800;
+  line-height: 1;
+  background: var(--grad-brand);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.stat__label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* ---------------- Layout grid ---------------- */
+.home__grid {
+  display: grid;
+  grid-template-columns: minmax(300px, 360px) 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+/* ---------------- Composer ---------------- */
+.composer {
+  position: sticky;
+  top: 88px;
+  padding: 1.5rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.composer__head {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin-bottom: 1.25rem;
+}
+
+.composer__head h2 {
+  font-size: 1.15rem;
+  margin: 0;
+}
+
+.composer__head p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.composer__icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 14px;
+  color: #fff;
+  background: var(--grad-brand);
+  box-shadow: 0 10px 20px -10px rgba(109, 94, 252, 0.9);
+}
+
+.composer__form {
+  display: grid;
+  gap: 1rem;
+}
+
+.composer__submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
   width: 100%;
-  padding: 8px;
-  margin: 8px 0 16px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  box-sizing: border-box;
-}
-
-form input[type="submit"] {
-  background-color: #007bff;
-  color: white;
-  padding: 10px 20px;
+  padding: 0.85rem 1rem;
   border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 16px;
+  border-radius: 12px;
+  color: #fff;
+  font-family: var(--font-display);
+  font-weight: 700;
+  background: var(--grad-brand);
+  background-size: 160% 160%;
+  box-shadow: 0 14px 26px -14px rgba(109, 94, 252, 0.9);
+  transition: transform var(--transition), box-shadow var(--transition),
+    background-position var(--transition), opacity var(--transition);
 }
 
-form input[type="submit"]:hover {
-  background-color: #0056b3;
+.composer__submit:hover:not(:disabled) {
+  transform: translateY(-2px);
+  background-position: 100% 50%;
+  box-shadow: 0 20px 32px -14px rgba(109, 94, 252, 0.95);
+}
+
+.composer__submit:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  box-shadow: none;
+}
+
+/* ---------------- Notes list ---------------- */
+.notes {
+  min-width: 0;
+}
+
+.notes__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.notes__head h2 {
+  font-size: 1.25rem;
+  margin: 0;
+}
+
+.notes__pill {
+  padding: 0.28rem 0.75rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--primary-700);
+  background: rgba(109, 94, 252, 0.12);
+}
+
+.notes__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+/* ---------------- Empty state ---------------- */
+.empty {
+  padding: 3rem 1.5rem;
+  text-align: center;
+  border: 1.5px dashed var(--border-strong);
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.empty__art {
+  display: grid;
+  place-items: center;
+  width: 84px;
+  height: 84px;
+  margin: 0 auto 1rem;
+  border-radius: 24px;
+  color: var(--primary);
+  background: var(--grad-soft);
+}
+
+.empty h3 {
+  margin: 0 0 0.35rem;
+  font-size: 1.15rem;
+}
+
+.empty p {
+  margin: 0 auto;
+  max-width: 34ch;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+/* ---------------- Loading skeletons ---------------- */
+.skeleton {
+  padding: 1.25rem;
+  border-radius: var(--radius);
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.skeleton__line {
+  height: 12px;
+  border-radius: 6px;
+  margin-bottom: 0.6rem;
+  background: linear-gradient(
+    90deg,
+    var(--surface-2) 25%,
+    #eceefb 37%,
+    var(--surface-2) 63%
+  );
+  background-size: 400% 100%;
+  animation: shimmer 1.4s ease infinite;
+}
+
+.skeleton__line--title {
+  width: 55%;
+  height: 16px;
+}
+
+.skeleton__line--short {
+  width: 40%;
+  margin-bottom: 0;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: 0 0;
+  }
+}
+
+/* ---------------- Responsive ---------------- */
+@media (max-width: 900px) {
+  .home__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .composer {
+    position: static;
+  }
+}
+
+@media (max-width: 560px) {
+  .home__hero {
+    align-items: flex-start;
+  }
+
+  .home__stats {
+    width: 100%;
+  }
+
+  .stat {
+    flex: 1;
+  }
 }

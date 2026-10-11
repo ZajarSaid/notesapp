@@ -17,5 +17,8 @@ class UserSerializer(serializers.ModelSerializer):
 class NotesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Note
-        fields = ["id", "title", "content", "author"]
-        extra_kwargs = {"author": {"read_only": True}}
+        fields = ["id", "title", "content", "author", "created_at", "modified_at"]
+        # author is set from the request user; the timestamps are managed
+        # by the model (auto_now / auto_now_add), so all three are
+        # read-only to the client.
+        read_only_fields = ["author", "created_at", "modified_at"]

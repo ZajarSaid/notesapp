@@ -1,33 +1,141 @@
-.note-container {
-  padding: 10px;
-  margin: 20px 0;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+.note-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 1.15rem 1.15rem 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-xs);
+  overflow: hidden;
+  transition: transform var(--transition), box-shadow var(--transition),
+    border-color var(--transition);
+  animation: note-in 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-.note-title {
-  color: #333;
+/* Coloured accent strip on the left edge. */
+.note-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 5px;
+  background: var(--accent, var(--primary));
 }
 
-.note-content {
-  color: #666;
+.note-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: color-mix(in srgb, var(--accent, var(--primary)) 40%, var(--border));
 }
 
-.note-date {
-  color: #999;
-  font-size: 0.8rem;
+@keyframes note-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.delete-button {
-  background-color: #f44336; /* Red */
-  color: white;
+.note-card__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.note-card__badge {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 11px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: var(--accent, var(--primary));
+  background: color-mix(in srgb, var(--accent, var(--primary)) 14%, white);
+}
+
+.note-card__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.note-card__action {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
   border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s;
+  border-radius: 10px;
+  color: var(--muted);
+  background: transparent;
+  opacity: 0;
+  transform: translateY(-2px);
+  transition: opacity var(--transition), color var(--transition),
+    background var(--transition), transform var(--transition);
 }
 
-.delete-button:hover {
-  background-color: #d32f2f; /* Darker red */
+.note-card:hover .note-card__action,
+.note-card__action:focus-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.note-card__edit:hover {
+  color: var(--primary);
+  background: rgba(109, 94, 252, 0.12);
+}
+
+.note-card__delete:hover {
+  color: var(--danger);
+  background: var(--danger-soft);
+}
+
+.note-card__title {
+  font-size: 1.05rem;
+  margin: 0 0 0.4rem;
+  overflow-wrap: anywhere;
+}
+
+.note-card__content {
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 0.92rem;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+  /* Clamp long notes to keep the grid tidy. */
+  display: -webkit-box;
+  -webkit-line-clamp: 6;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.note-card__foot {
+  margin-top: auto;
+  padding-top: 0.85rem;
+}
+
+.note-card__date {
+  font-size: 0.76rem;
+  color: var(--muted-2);
+  letter-spacing: 0.02em;
+}
+
+.note-card__edited {
+  font-size: 0.76rem;
+  font-style: italic;
+  color: var(--primary);
+}
+
+/* Touch devices don't hover — keep the action buttons always visible. */
+@media (hover: none) {
+  .note-card__action {
+    opacity: 1;
+    transform: none;
+  }
 }

@@ -36,6 +36,17 @@ class NoteListCreate(generics.ListCreateAPIView):
         serializer.save(author=self.request.user)
 
 
+class NoteUpdate(generics.RetrieveUpdateAPIView):
+    serializer_class = NotesSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        # Scoping to the requesting author means a user can only ever
+        # fetch/edit their own notes (a foreign id yields 404, not 403).
+        user = self.request.user
+        return Note.objects.filter(author=user)
+
+
 class NoteDelete(generics.DestroyAPIView):
     serializer_class = NotesSerializer
     permission_classes = [IsAuthenticated]

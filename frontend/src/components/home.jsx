@@ -1,5 +1,4 @@
-import { useState, useEffect } from "react";
-import api from "../api";
+import { useState } from "react";
 
 export default function NameHandler() {
   const [name, setName] = useState("");

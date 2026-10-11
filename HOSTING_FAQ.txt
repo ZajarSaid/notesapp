@@ -1,0 +1,366 @@
+====================================================================
+HOSTING FAQ - NOTES APP (Always Data backend + Vercel frontend)
+====================================================================
+Project : DJANG0-REACT (Django REST + React/Vite notes app)
+Backend : https://notesapp.alwaysdata.net   (Always Data, free plan)
+Frontend: to be hosted on Vercel
+Written: 2026-10-11
+
+
+--------------------------------------------------------------------
+1. UNDERSTANDING YOUR SITE (what is actually running)
+--------------------------------------------------------------------
+Your backend is a Django project served by Always Data like this:
+
+  Browser  ->  Always Data Apache proxy  ->  uWSGI  ->  Django (wsgi.py)
+
+Key locations on the server (account = notesapp):
+  Code            /home/notesapp/notesapp/Backend
+  WSGI entry      /home/notesapp/notesapp/Backend/backend/wsgi.py
+  Virtualenv      /home/notesapp/venv          (Python 3.12)
+  Static files    /home/notesapp/notesapp/Backend/staticfiles  (served by WhiteNoise)
+  Server .env     /home/notesapp/notesapp/Backend/.env  (secrets, DB, DEBUG)
+  PostgreSQL DB   postgresql-notesapp.alwaysdata.net  (notesapp_db)
+
+Site configuration (Web > Sites > your site):
+  Type               : Python WSGI
+  Python version     : 3.12   (MUST match the venv, else "No module named 'django'")
+  Application path   : notesapp/Backend/backend/wsgi.py   (prefix /home/notesapp/ is automatic)
+  Working directory  : notesapp/Backend                   (prefix /home/notesapp/ is automatic)
+  Virtualenv dir     : venv                                (prefix /home/notesapp/ is automatic)
+  SSL                : Force HTTPS enabled (free Let's Encrypt cert)
+
+Available routes (there is intentionally NO route for "/"):
+  /home/            -> returns "yeaaaaaaaaaaaaaaaa"
+  /notes/           -> list/create notes (JWT required)
+  /notes/delete/<id>/ -> delete note (JWT required)
+  /user/register/   /user/token/   /user/refresh/
+  /admin/           -> Django admin
+  So visiting "/" gives "Not Found" = normal, not a bug.
+
+
+--------------------------------------------------------------------
+2. HOW LONG WILL IT STAY ONLINE?
+--------------------------------------------------------------------
+- Always Data's free plan is free "for life" (no expiry date) as long as
+  the account is active.
+- The Django/uWSGI process is NOT kept running continuously. Always Data
+  stops an idle application after a configurable delay and AUTOMATICALLY
+  restarts it on the next HTTP request. This is normal and costs nothing.
+  First request after a long idle period may take a second or two longer.
+- FREE-ACCOUNT INACTIVITY RULE (important):
+  Always Data suspends a free account if you do not log into the admin
+  interface (https://admin.alwaysdata.com) periodically:
+      * account younger than 1 year : log in at least every 120 days
+      * account 1-4 years old       : every 6 months
+      * account older than 4 years  : once a year
+  If suspended, the site shows "Account suspended". Simply LOGGING IN to
+  the admin interface lifts the suspension immediately - nothing is lost.
+- Free-plan resources: ~1 GB SSD, 256 MB RAM, 1/4 CPU.
+- Always Data states there is no guarantee a process is never stopped
+  (infrastructure maintenance etc.). For a 24/7 guarantee you would need a
+  paid "service" + a Reverse-proxy site. For a personal notes app the free
+  plan is fine.
+
+Summary: your site stays online indefinitely; the process sleeps when idle
+and wakes on demand; just log into the admin panel a few times a year.
+
+
+--------------------------------------------------------------------
+3. CONFIGURATION TO KEEP IT "ACTIVE"
+--------------------------------------------------------------------
+You do NOT need to do anything for normal operation - it self-starts.
+
+Optional, if you want to reduce/eliminate the idle stop:
+  Web > Sites > your site > gear icon (Modify) > Advanced > Idle time
+    - set to 0 to ask the system never to stop it (not guaranteed).
+    - leaving it blank/default lets it sleep when idle (recommended/free).
+
+Also make sure:
+  - "Force HTTPS" is enabled on the site (SSL tab) so you get the free cert.
+  - You log into the admin interface at least as often as the rule in
+    section 2 to avoid a free-account suspension.
+
+
+--------------------------------------------------------------------
+4. DO I HAVE TO OPEN THE SSH SHELL EVERY TIME?
+--------------------------------------------------------------------
+No. SSH is only a DEPLOYMENT/MAINTENANCE tool. Once deployed:
+  - the website serves requests by itself (auto-start on demand),
+  - the database stays up by itself,
+  - you do NOT need an SSH session or a terminal open.
+Use SSH only when you change the backend: pull code, install packages,
+run migrations, collect static, or read logs.
+
+
+--------------------------------------------------------------------
+5. HOSTING THE FRONTEND ON VERCEL (make the app work end-to-end)
+--------------------------------------------------------------------
+Step A - Backend: allow the Vercel domain (CORS)
+  Edit the server .env at ~/notesapp/Backend/.env on Always Data:
+      CORS_ALLOW_ALL_ORIGINS=False
+      CORS_ALLOWED_ORIGINS=https://your-app.vercel.app
+  (add more comma-separated origins for Vercel preview URLs if you use them,
+   e.g. https://your-app-git-main-you.vercel.app)
+  Then activate the venv and restart the site (Web > Sites > Restart).
+  Note: the API uses JWT in the Authorization header, so CSRF is not
+  involved for the API; CORS is the only "cross-origin" switch you need.
+
+Step B - Frontend: point it at the backend
+  The React app reads VITE_API_URL (see frontend/src/api.js).
+  Create frontend/.env (or a Vercel environment variable):
+      VITE_API_URL=https://notesapp.alwaysdata.net/
+  IMPORTANT: Vite bakes VITE_* values at BUILD time. Set it BEFORE building
+  and redeploy. If you set it only after deploy, rebuild.
+
+Step C - Deploy on Vercel
+  1. Push the repo to GitHub (already at github.com/ZajarSaid/notesapp).
+  2. Vercel > Add New > Project > import the repo.
+  3. Root Directory      : frontend
+     Framework Preset    : Vite
+     Build Command       : npm run build
+     Output Directory    : dist
+     Environment Variable: VITE_API_URL = https://notesapp.alwaysdata.net/
+  4. Deploy, then copy the given https://<name>.vercel.app URL.
+
+Step D - Close the loop
+  Put that Vercel URL into CORS_ALLOWED_ORIGINS on the backend (Step A).
+  Open the Vercel site, register/login, create a note - it should hit the
+  Always Data API successfully.
+
+NOTE on domains: on the FREE Always Data plan only the provided
+*.alwaysdata.net address can be used for the BACKEND site (no custom
+domain for websites on free). The frontend can freely use a Vercel domain
+(or your own custom domain added in Vercel). So backend stays on
+notesapp.alwaysdata.net while the frontend uses the Vercel domain - this
+is perfectly fine.
+
+
+--------------------------------------------------------------------
+6. MAKING CHANGES TO THE BACKEND (do NOT re-clone)
+--------------------------------------------------------------------
+No, you never clone again. You reuse the existing server clone at
+/home/notesapp/notesapp and just pull your new commits.
+
+Normal workflow:
+  1) On your PC: edit code, then
+         git add . ; git commit -m "message" ; git push
+  2) SSH into Always Data:
+         ssh notesapp@ssh-notesapp.alwaysdata.net
+  3) Update the code + environment:
+         cd ~/notesapp
+         git pull
+         cd Backend
+         source ~/venv/bin/activate       # or use ~/venv/bin/python ...
+         pip install -r requirements.txt  # needed only if requirements.txt changed
+         python manage.py migrate         # needed only if models/migrations changed
+         python manage.py collectstatic --noinput   # needed only if static files changed
+  4) Restart the site: Web > Sites > your site > Restart.
+
+Notes:
+  - The server .env is NOT in git (it is gitignored), so "git pull" will
+    never overwrite your secrets/DB settings. If a NEW setting is added to
+    the code, remember to add it to the server .env too.
+  - Restarting is required after code changes because uWSGI keeps the app
+    loaded in memory.
+  - If you prefer no manual steps, this 3-command block can be wrapped in a
+    script (e.g. ~/deploy.sh) or a GitLab/GitHub webhook, but for now the
+    manual pull above is the simplest reliable method.
+  - To read errors any time:
+        tail -n 60 ~/admin/logs/uwsgi/*.log
+
+
+--------------------------------------------------------------------
+7. QUICK COMMAND REFERENCE
+--------------------------------------------------------------------
+SSH login          : ssh notesapp@ssh-notesapp.alwaysdata.net
+Enter venv         : source ~/venv/bin/activate
+Django check       : ~/venv/bin/python ~/notesapp/Backend/manage.py check
+Migrations         : ~/venv/bin/python ~/notesapp/Backend/manage.py migrate
+Collect static     : ~/venv/bin/python ~/notesapp/Backend/manage.py collectstatic --noinput
+App logs           : tail -n 60 ~/admin/logs/uwsgi/*.log
+Site admin         : https://admin.alwaysdata.com  (Web > Sites, Databases, Environment)
+Backend health     : https://notesapp.alwaysdata.net/home/
+====================================================================
+
+
+====================================================================
+8. ALWAYS DATA vs RENDER - ARCHITECTURAL DIFFERENCE (Django)
+====================================================================
+Both can run Django, but they are different hosting models.
+
+ALWAYS DATA (shared hosting, managed, persistent account)
+  - You get a REAL, PERSISTENT Linux user account with a home directory
+    /home/notesapp that survives across days/reboots.
+  - Access by SSH/SFTP. You install the venv, clone the repo and run
+    manage.py yourself; the files stay there.
+  - Front end: their Apache proxy forwards requests to their own uWSGI
+    process that hosts your Python app. You do NOT choose/run the app
+    server - the platform runs uWSGI for you.
+  - You configure the app in the panel as a "Python WSGI" site: you only
+    give the path to wsgi.py + working dir + virtualenv.
+  - Database: a managed PostgreSQL/MariaDB on their infrastructure.
+  - Deploy model: IMPERATIVE / INTERACTIVE. You connect and run commands
+    (git pull, pip install, migrate, collectstatic, restart).
+  - Free plan: ~1 GB disk, 256 MB RAM, 1/4 CPU; process idles/stops when
+    unused and auto-restarts on request.
+
+RENDER (PaaS, container-based, immutable deployments)
+  - You do NOT get a full persistent server. Render builds a container
+    image from your Git repo (build command), then runs it.
+  - The runtime FILESYSTEM IS EPHEMERAL: anything written at runtime
+    (e.g. a local sqlite file, uploaded media) is LOST on the next
+    deploy/restart. Only files baked into the image at BUILD time persist.
+  - Front end: Render's own proxy -> YOUR process bound to $PORT. There is
+    no Apache and no managed uWSGI; you must start your own WSGI server,
+    normally Gunicorn.
+  - Deploy model: DECLARATIVE / REPRODUCIBLE. Everything is:
+        Build command   (e.g. pip install -r requirements.txt)
+        Start command   (e.g. gunicorn backend.wsgi:application)
+        Pre-deploy / release command (e.g. python manage.py migrate)
+        Environment variables (dashboard)
+    A git push triggers a fresh build+deploy automatically.
+  - Database: optional managed Render PostgreSQL (free instance expires
+    after ~30 days) OR connect to an EXTERNAL database (e.g. your Always
+    Data PostgreSQL) since outbound connections are allowed.
+  - Free web service spins down after ~15 min of inactivity and cold-starts
+    on the next request (slower first hit than Always Data's uWSGI wake-up).
+
+One-line summary:
+  Always Data = a persistent shell on a shared box (you drive everything),
+  Render      = immutable containers built from Git (the platform drives).
+
+
+====================================================================
+9. WHY uWSGI ON ALWAYS DATA AND NOT GUNICORN HERE
+====================================================================
+It is not that uWSGI is "better" - it is a platform decision.
+
+- on Always Data, the WSGI server is PROVIDED AND MANAGED by the platform.
+  Their "Python WSGI" site type runs your app inside their uWSGI instance,
+  wired to their Apache proxy. The panel only asks for the WSGI
+  application path; you never get to pick the server. So gunicorn is not
+  used simply because Always Data does not run gunicorn there.
+
+- uWSGI is well suited to shared hosting: one master can host MANY apps
+  (emperor/ vassal mode), it has a rich plugin system, handles process
+  lifecycle, and integrates with Apache via the uwsgi protocol. That is
+  exactly what a shared host wants.
+
+- on Render you must run your OWN WSGI server bound to $PORT. Gunicorn is
+  the de-facto standard there: pure-Python, simple pre-fork worker model,
+  easy `gunicorn <module>:application` CLI, huge documentation. Render has
+  no managed WSGI layer, so you bring Gunicorn (or uvicorn for ASGI).
+
+Technical point: BOTH implement the same WSGI spec. Django's wsgi.py
+exposes the `application` callable; uWSGI and Gunicorn both import it and
+speak HTTP (uWSGI talks to Apache via its own protocol, Gunicorn listens
+directly on TCP). The difference is WHO runs the server and HOW the front
+proxy reaches it, not how Django works.
+
+NOTE: our requirements.txt includes gunicorn. It is harmless on Always Data
+(it is just installed, unused) and it is REQUIRED on Render.
+
+
+====================================================================
+10. WHY THE SSH SHELL IS A TECHNICAL DIFFERENCE
+====================================================================
+The presence/absence of an SSH shell changes the whole deployment model:
+
+- WITH SSH (Always Data):
+    * State is PERSISTENT and MUTABLE. You edit files, create venvs, keep
+      a .env with secrets, append logs - all survive.
+    * Migrations/collectstatic/pip are run interactively, in-place.
+    * Debugging is direct: tail the uWSGI log, run `manage.py check`,
+      inspect the filesystem.
+    * Risk: the server can DRIFT from the repo (manual edits not in git).
+
+- WITHOUT SSH (Render, by default):
+    * State is IMMUTABLE and EPHEMERAL. Each deploy = a fresh container
+      built from the repo; nothing you did interactively survives.
+    * There is no persistent .env file - config lives in dashboard env
+      vars. There is no "edit the file on the server".
+    * Every action must be encoded: packages in requirements.txt, static
+      collected during BUILD, migrations in a release/pre-deploy command,
+      the server in a start command. The repo IS the source of truth.
+    * Debugging is via the dashboard Logs tab (not a live shell).
+    * Benefit: reproducible, no drift, easy rollback/scale.
+
+So moving Always Data -> Render is mostly about converting your manual SSH
+steps into build/start/release commands + env vars.
+
+
+====================================================================
+11. HOW TO SHIFT TO RENDER + WHAT TO CONSIDER
+====================================================================
+Current repo is already Render-friendly because we added gunicorn and
+whitenoise. Steps:
+
+A) Create the Render Web Service
+   - Render > New > Web Service > connect github.com/ZajarSaid/notesapp.
+   - Branch: main
+   - Root Directory: Backend            (so `backend` package is importable)
+   - Runtime: Python
+   - Build Command:
+        pip install -r requirements.txt && python manage.py collectstatic --noinput
+   - Start Command:
+        gunicorn backend.wsgi:application
+   - (collectstatic must run at BUILD, because the runtime disk is ephemeral.)
+
+B) Python version
+   - Add env var PYTHON_VERSION=3.12 (or commit a `.python-version` file
+     containing `3.12`). Match the version your deps were resolved for.
+
+C) Environment variables (Render dashboard > Environment)
+        DEBUG=False
+        SECRET_KEY=<your generated key>
+        ALLOWED_HOSTS=<your-app>.onrender.com
+        CSRF_TRUSTED_ORIGINS=https://<your-app>.onrender.com
+        CORS_ALLOW_ALL_ORIGINS=False
+        CORS_ALLOWED_ORIGINS=https://<your-frontend>.vercel.app
+        DB_ENGINE=django.db.backends.postgresql
+        DB_NAME / DB_USER / DB_PASSWORD / DB_HOST / DB_PORT
+   (Either use a Render PostgreSQL's connection values, or keep pointing
+    at postgresql-notesapp.alwaysdata.net.)
+
+D) Migrations
+   - Best practice: run them as a "Pre-Deploy Command" (or release):
+        python manage.py migrate
+   - Do NOT run migrate in the build command if the DB is not reachable at
+     build time. Pre-deploy runs against the live DB.
+
+E) Database choice (important)
+   - Render free PostgreSQL EXPIRES after ~30 days (then deleted). For a
+     persistent app, either take a paid Render DB, or keep using the
+     Always Data PostgreSQL (set the same DB_* vars).
+   - If connecting to Always Data PG from Render you may need SSL. If the
+     connection complains, add to DATABASES "default" OPTIONS:
+        "OPTIONS": {"sslmode": "require"}
+     (Always Data PostgreSQL requires SSL by default.)
+
+F) Static files
+   - WhiteNoise serves /static/ from the staticfiles/ folder baked into the
+     image at build time -> works on Render with no extra config.
+   - Media/user uploads: the ephemeral disk is NOT durable. If you ever add
+     file uploads, use external object storage (AWS S3 / Cloudflare R2)
+     instead of the local disk.
+
+G) What changes / what to watch
+   - Cold starts: free Render sleeps after ~15 min; first request is slow.
+   - No SSH: use dashboard Logs; run one-off commands via "Shell" (paid) or
+     a deploy/release command.
+   - ALLOWED_HOSTS must include the .onrender.com host (and any custom
+     domain you add).
+   - Re-point the frontend VITE_API_URL to the new Render URL and add that
+     URL to the backend CORS_ALLOWED_ORIGINS.
+   - The Procfile in Backend/ already says
+        web: gunicorn backend.wsgi:application
+     Render will use it as the start command if you prefer to not type one,
+     but you still must set Root Directory = Backend.
+
+H) Keeping Always Data while testing Render
+   - You can run both at once: the two apps can share the same external
+     Always Data PostgreSQL (careful: both would run migrations - only one
+     should own schema changes). Point only one at the DB as the writer
+     during your migration, or use a separate DB for Render until cutover.
+====================================================================
